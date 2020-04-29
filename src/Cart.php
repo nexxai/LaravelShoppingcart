@@ -232,7 +232,7 @@ class Cart
         $this->events->dispatch('cart.removed', $cartItem);
 
         $this->session->put($this->instance, $content);
-        
+
         return $this;
     }
 
@@ -666,7 +666,7 @@ class Cart
         $this->instance($currentInstance);
 
         $this->getConnection()->table($this->getTableName())->where('identifier', $identifier)->delete();
-        
+
         return $this;
     }
 
