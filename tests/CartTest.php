@@ -869,7 +869,7 @@ class CartTest extends TestCase
         $this->assertDatabaseHas('shoppingcart', ['identifier' => $identifier, 'instance' => 'default', 'content' => $serialized]);
 
         $this->assertInstanceOf(\Gloudemans\Shoppingcart\Cart::class, $store);
-        
+
         Event::assertDispatched('cart.stored');
     }
 
@@ -922,7 +922,7 @@ class CartTest extends TestCase
         $this->assertItemsInCart(1, $cart);
 
         $this->assertDatabaseMissing('shoppingcart', ['identifier' => $identifier, 'instance' => 'default']);
-        
+
         $this->assertInstanceOf(\Gloudemans\Shoppingcart\Cart::class, $restore);
 
         Event::assertDispatched('cart.restored');
