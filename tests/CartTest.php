@@ -423,10 +423,11 @@ class CartTest extends TestCase
 
         $cart->add(new BuyableProduct());
 
-        $cart->remove('027c91341fd5cf4d2579b49c4b6a90da');
+        $removed = $cart->remove('027c91341fd5cf4d2579b49c4b6a90da');
 
         $this->assertItemsInCart(0, $cart);
         $this->assertRowsInCart(0, $cart);
+        $this->assertInstanceOf(\Gloudemans\Shoppingcart\Cart::class, $removed);
 
         Event::assertDispatched('cart.removed');
     }
@@ -861,12 +862,14 @@ class CartTest extends TestCase
 
         $cart->add(new BuyableProduct());
 
-        $cart->store($identifier = 123);
+        $store = $cart->store($identifier = 123);
 
         $serialized = serialize($cart->content());
 
         $this->assertDatabaseHas('shoppingcart', ['identifier' => $identifier, 'instance' => 'default', 'content' => $serialized]);
 
+        $this->assertInstanceOf(\Gloudemans\Shoppingcart\Cart::class, $store);
+        
         Event::assertDispatched('cart.stored');
     }
 
@@ -914,11 +917,13 @@ class CartTest extends TestCase
 
         $this->assertItemsInCart(0, $cart);
 
-        $cart->restore($identifier);
+        $restore = $cart->restore($identifier);
 
         $this->assertItemsInCart(1, $cart);
 
         $this->assertDatabaseMissing('shoppingcart', ['identifier' => $identifier, 'instance' => 'default']);
+        
+        $this->assertInstanceOf(\Gloudemans\Shoppingcart\Cart::class, $restore);
 
         Event::assertDispatched('cart.restored');
     }
