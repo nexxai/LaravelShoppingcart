@@ -47,9 +47,9 @@ class CartTest extends TestCase
 
         $app['config']->set('database.default', 'testing');
         $app['config']->set('database.connections.testing', [
-            'driver' => 'sqlite',
+            'driver'   => 'sqlite',
             'database' => ':memory:',
-            'prefix' => '',
+            'prefix'   => '',
         ]);
     }
 
@@ -61,7 +61,7 @@ class CartTest extends TestCase
         parent::setUp();
 
         $this->app->afterResolving('migrator', function ($migrator) {
-            $migrator->path(realpath(__DIR__ . '/../src/Database/migrations'));
+            $migrator->path(realpath(__DIR__.'/../src/Database/migrations'));
         });
     }
 
@@ -515,27 +515,27 @@ class CartTest extends TestCase
         $this->assertEquals([
             '027c91341fd5cf4d2579b49c4b6a90da' => [
                 'rowId' => '027c91341fd5cf4d2579b49c4b6a90da',
-                'id' => 1,
-                'name' => 'Item name',
-                'qty' => 1,
-                'price' => 10.00,
-                'tax' => 2.10,
+                'id'       => 1,
+                'name'     => 'Item name',
+                'qty'      => 1,
+                'price'    => 10.00,
+                'tax'      => 2.10,
                 'subtotal' => 10.0,
-                'options' => [],
+                'options'  => [],
                 'discount' => 0.0,
-                'weight' => 0.0,
+                'weight'   => 0.0,
             ],
             '370d08585360f5c568b18d1f2e4ca1df' => [
-                'rowId' => '370d08585360f5c568b18d1f2e4ca1df',
-                'id' => 2,
-                'name' => 'Item name',
-                'qty' => 1,
-                'price' => 10.00,
-                'tax' => 2.10,
+                'rowId'    => '370d08585360f5c568b18d1f2e4ca1df',
+                'id'       => 2,
+                'name'     => 'Item name',
+                'qty'      => 1,
+                'price'    => 10.00,
+                'tax'      => 2.10,
                 'subtotal' => 10.0,
-                'options' => [],
+                'options'  => [],
                 'discount' => 0.0,
-                'weight' => 0.0,
+                'weight'   => 0.0,
             ],
         ], $content->toArray());
     }
