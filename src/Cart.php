@@ -215,7 +215,7 @@ class Cart
      *
      * @param string $rowId
      *
-     * @return void
+     * @return \Gloudemans\Shoppingcart\Cart
      */
     public function remove($rowId)
     {
@@ -228,6 +228,8 @@ class Cart
         $this->events->dispatch('cart.removed', $cartItem);
 
         $this->session->put($this->instance, $content);
+
+        return $this;
     }
 
     /**
@@ -594,7 +596,7 @@ class Cart
      *
      * @param mixed $identifier
      *
-     * @return void
+     * @return \Gloudemans\Shoppingcart\Cart
      */
     public function store($identifier)
     {
@@ -615,6 +617,8 @@ class Cart
         );
 
         $this->events->dispatch('cart.stored');
+
+        return $this;
     }
 
     /**
@@ -622,7 +626,7 @@ class Cart
      *
      * @param mixed $identifier
      *
-     * @return void
+     * @return \Gloudemans\Shoppingcart\Cart
      */
     public function restore($identifier)
     {
@@ -654,6 +658,8 @@ class Cart
         $this->session->put($this->instance, $content);
 
         $this->instance($currentInstance);
+
+        return $this;
     }
 
     /**
