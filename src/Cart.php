@@ -609,7 +609,7 @@ class Cart
         $this->getConnection()->table($this->getTableName())->updateOrInsert(
             [
                 'identifier' => $identifier,
-                'instance' => $this->currentInstance(),
+                'instance'   => $this->currentInstance(),
             ],
             [
                 'content' => serialize($content),
