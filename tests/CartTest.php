@@ -514,7 +514,7 @@ class CartTest extends TestCase
         $this->assertInstanceOf(Collection::class, $content);
         $this->assertEquals([
             '027c91341fd5cf4d2579b49c4b6a90da' => [
-                'rowId' => '027c91341fd5cf4d2579b49c4b6a90da',
+                'rowId'    => '027c91341fd5cf4d2579b49c4b6a90da',
                 'id'       => 1,
                 'name'     => 'Item name',
                 'qty'      => 1,
