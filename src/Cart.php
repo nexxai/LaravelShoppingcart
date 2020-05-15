@@ -627,7 +627,7 @@ class Cart
                 'instance'   => $this->currentInstance(),
             ],
             [
-                'content' => serialize($content),
+                'content'    => serialize($content),
                 'created_at' => $this->createdAt ?: Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]
