@@ -2,6 +2,7 @@
 
 namespace Gloudemans\Tests\Shoppingcart;
 
+use Carbon\Carbon;
 use Gloudemans\Shoppingcart\Cart;
 use Gloudemans\Shoppingcart\CartItem;
 use Gloudemans\Shoppingcart\ShoppingcartServiceProvider;
@@ -870,6 +871,50 @@ class CartTest extends TestCase
         Event::assertDispatched('cart.stored');
     }
 
+    /** @test */
+    public function it_can_store_and_retrieve_cart_from_the_database_with_correct_timestamps()
+    {
+        $this->artisan('migrate', [
+            '--database' => 'testing',
+        ]);
+
+        Event::fake();
+
+        $cart = $this->getCart();
+
+        $cart->add(new BuyableProduct());
+
+        /* Sleep as database does not store ms */
+        $beforeStore = Carbon::now();
+        sleep(1);
+
+        $cart->store($identifier = 123);
+
+        sleep(1);
+        $afterStore = Carbon::now();
+
+        $cart->restore($identifier);
+
+        $this->assertTrue($beforeStore->lessThanOrEqualTo($cart->createdAt()) && $afterStore->greaterThanOrEqualTo($cart->createdAt()));
+        $this->assertTrue($beforeStore->lessThanOrEqualTo($cart->updatedAt()) && $afterStore->greaterThanOrEqualTo($cart->updatedAt()));
+
+        /* Sleep as database does not store ms */
+        $beforeSecondStore = Carbon::now();
+        sleep(1);
+
+        $cart->store($identifier);
+
+        sleep(1);
+        $afterSecondStore = Carbon::now();
+
+        $cart->restore($identifier);
+
+        $this->assertTrue($beforeStore->lessThanOrEqualTo($cart->createdAt()) && $afterStore->greaterThanOrEqualTo($cart->createdAt()));
+        $this->assertTrue($beforeSecondStore->lessThanOrEqualTo($cart->updatedAt()) && $afterSecondStore->greaterThanOrEqualTo($cart->updatedAt()));
+
+        Event::assertDispatched('cart.stored');
+    }
+
     /**
      * @test
      */
@@ -1033,7 +1078,7 @@ class CartTest extends TestCase
     }
 
     /** @test */
-    public function cart_hast_no_rounding_errors()
+    public function cart_has_no_rounding_errors()
     {
         $cart = $this->getCart();
 
@@ -1293,6 +1338,63 @@ class CartTest extends TestCase
         });
     }
 
+    /** @test */
+    public function it_use_correctly_rounded_values_for_totals_and_cart_summary()
+    {
+        $this->setConfigFormat(2, ',', '');
+
+        $cart = $this->getCartDiscount(6);
+
+        $cartItem = $cart->add(new BuyableProduct(1, 'First item', 0.18929), 1000);
+        $cart->add(new BuyableProduct(2, 'Second item', 4.41632), 5);
+        $cart->add(new BuyableProduct(3, 'Third item', 0.37995), 25);
+
+        $cart->setGlobalTax(22);
+
+        // check total
+        $this->assertEquals('253,29', $cart->total());
+
+        // check that the sum of cart subvalues matches the total (in order to avoid cart summary to looks wrong)
+        $this->assertEquals($cart->totalFloat(), $cart->subtotalFloat() + $cart->taxFloat());
+    }
+
+    /** @test */
+    public function it_use_gross_price_as_base_price()
+    {
+        $cart = $this->getCartDiscount(0);
+        config(['cart.gross_price' => true]);
+
+        $cartItem = $cart->add(new BuyableProduct(1, 'First item', 100), 2);
+
+        $cart->setGlobalTax(22);
+
+        // check net price
+        $this->assertEquals(81.97, round($cartItem->priceNet, 2));
+    }
+
+    /** @test */
+    public function it_use_gross_price_and_it_use_correctly_rounded_values_for_totals_and_cart_summary()
+    {
+        $this->setConfigFormat(2, ',', '');
+        config(['cart.gross_price' => true]);
+
+        $cart = $this->getCartDiscount(6);
+
+        $cartItem = $cart->add(new BuyableProduct(1, 'First item', 0.23093), 1000);
+        $cart->add(new BuyableProduct(2, 'Second item', 5.38791), 5);
+        $cart->add(new BuyableProduct(3, 'Third item', 0.46354), 25);
+
+        $cart->setGlobalTax(22);
+
+        // check total
+        $this->assertEquals('254,12', $cart->total());
+
+        // check item price total
+        $this->assertEquals(190, $cartItem->priceTotal);
+        // check that the sum of cart subvalues matches the total (in order to avoid cart summary to looks wrong)
+        $this->assertEquals($cart->totalFloat(), $cart->subtotalFloat() + $cart->taxFloat());
+    }
+
     /**
      * @test
      */
@@ -1348,12 +1450,14 @@ class CartTest extends TestCase
     /**
      * Get an instance of the cart with discount.
      *
+     * @param int $discount
+     *
      * @return \Gloudemans\Shoppingcart\Cart
      */
-    private function getCartDiscount($discount = 0)
+    private function getCartDiscount($discount = 50)
     {
         $cart = $this->getCart();
-        $cart->setGlobalDiscount(50);
+        $cart->setGlobalDiscount($discount);
 
         return $cart;
     }
